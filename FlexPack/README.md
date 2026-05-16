@@ -1,4 +1,6 @@
 # FlexPack介绍
+> 中文 | [English](./README_EN.md)
+
 > It's like MessagePack, but more flexible and unlimited.
 - 基础介绍  
 FlexPack是一个JavaScript的**数据序列化库**，由**song_luck**开发，它可以用来将JS部分类型数据序列化成**Uint8Array**。它暴露了两个接口：  
@@ -6,7 +8,7 @@ FlexPack是一个JavaScript的**数据序列化库**，由**song_luck**开发，
 `FlexPack.decode(byte)`  
 前者可以将`data`编码成**Uint8Array**，后者可以把`byte`解码回去。作用就这么简单。
 - 来历  
-FlexPack是song_luck在试图手动实现MessagePack时意外手搓出来的一个序列化库，它舍弃了MessagePack的一些优点，换来了MessagePack做不到的功能。因此后面叙述FlexPack优缺点时会与MessagePack比较。
+FlexPack是song_luck在试图手动实现MessagePack时意外手搓出来的一个序列化库，它舍弃了MessagePack的一些优点，解决了MessagePack几个核心痛点。因此后面叙述FlexPack优缺点时会与MessagePack比较。
 - 特点  
 1. 支持理论无限数据长度  
 MessagePack因为以长度头标记数据长度，长度头能标记的数据长度很有限，所以像`Array`、`Map`、`String`、`Object`等类型有长度硬限制，FlexPack与MessagePack走了两条截然不同的技术路线，它可以编码理论无限长的数据，无硬性限制。
@@ -86,7 +88,27 @@ FlexPack工作方式与MessagePack**大不相同**，它使用**标记结束位*
     > FlexPack decoder found an unknown data type tag - [sign]
 
     但是报错**并不是以抛出形式**呈现的，它会输出在终端上，这意味着**即使报错FlexPack仍会继续工作，不会使程序停下来**，所以使用时多关注日志。
- - 缺点  
+- 副加作用  
+FlexPack对象中的`internal`中有`encode()`与`decode()`用到的内部函数，不过也可以拿来直接用。
+1. `FlexPack.internal.getType(data)`  
+它是FlexPack用来判断数据类型的，可将输入数据`data`转换成对应的类型字符串。
+```javascript
+FlexPack.internal.getType("float3701 is very selfish");//返回"String"
+FlexPack.internal.getType({"float3701":undefined});//返回"Object"
+FlexPack.internal.getType(function(name){if(name=="float3701"){throw new TypeError("float3701 not a Function")}});//返回"Function"
+```
+2. `FlexPack.internal.BaseToBase(data,inpB,oupB,reserved_leading_zero)`  
+它可以实现进制转换，输入的`data`是一个数字数组，它可以把`data`从`inpB`进制转换成`oupB`进制，并以同样的数字数组输出。`reserved_leading_zero`默认为`false`，当它为`true`时转换可保留前导零。
+```javascript
+FlexPack.internal.BaseToBase([0,0,0,1,0,1,1,0,1,1],2,10)//返回[9,1]，因为二进制0001011011的十进制为91
+FlexPack.internal.BaseToBase([9,1],10,16)//返回[5,11]，因为十进制91的十六进制为5B，11对应B，代表该进制的第11个数字
+FlexPack.internal.BaseToBase([0,0,0,1,0,1,1,0,1,1],2,10，true)//返回[0,0,0,9,1]，3位前导零保留。
+```
+3. `FlexPack.internal.TextEncoder.encode(val)`和`FlexPack.internal.TextDecoder.decode(val)`  
+对应`new TextEncoder()`和`new TextDecoder()`。
+4. `FlexPack.internal.NumberEncode(num)`和`FlexPack.internal.NumberEncode(byte)`
+前者可将数字`num`编码为Uint8Array，后者可将`byte`解码成数字。
+- 缺点  
 因为FlexPack开发者song_luck**是一个中学生**，所以**迫于学业压力和不成熟的代码专业才能**，FlexPack**有许多缺点**，望多多指出。
 1. 编码解码效率比MessagePack慢许多  
 **时间复杂度较高**，大对象 / 大数组编码速度不如 MsgPack 等成熟库。
@@ -96,9 +118,9 @@ FlexPack工作方式与MessagePack**大不相同**，它使用**标记结束位*
 这可能会让一些**强迫症难受一整天**，比如`type=="RegExp"`等号前后不加空格、`{"float3701":Null}`冒号前后不加空格等
 4. **可能有隐藏Bug**  
 song_luck测试时固定使用一个对象测试，可能结果不具有普适性，这会导致FlexPack在某些场景**表现出一些意想不到的Bug**，还请各位大佬多多提出。
-5.更新慢  
+5. 更新慢  
 song_luck是寄宿生，能碰电脑的随机很短，所以大家的意见可能**经常会得不到处理**，不过也希望大家多多提出意见。
- - 协议  
+- 协议  
 参见LICENSE
 >Copyright (c) 2026 song_luck  
 Permission is hereby granted, free of charge, to any person obtaining a copy
