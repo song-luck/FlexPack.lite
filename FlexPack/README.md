@@ -1,10 +1,10 @@
 # FlexPack介绍
 > It's like MessagePack, but more flexible and unlimited.
 - 基础介绍  
-FlexPack是一个JavaScript的**数据序列化库**，由**song_luck**开发，它可以用来将JS部分类型数据序列化成**Unit8Array**。它暴露了两个接口：  
+FlexPack是一个JavaScript的**数据序列化库**，由**song_luck**开发，它可以用来将JS部分类型数据序列化成**Uint8Array**。它暴露了两个接口：  
 `FlexPack.encode(data)`  
 `FlexPack.decode(byte)`  
-前者可以将`data`编码成**Unit8Array**，后者可以把`byte`解码回去。作用就这么简单。
+前者可以将`data`编码成**Uint8Array**，后者可以把`byte`解码回去。作用就这么简单。
 - 来历  
 FlexPack是song_luck在试图手动实现MessagePack时意外手搓出来的一个序列化库，它舍弃了MessagePack的一些优点，换来了MessagePack做不到的功能。因此后面叙述FlexPack优缺点时会与MessagePack比较。
 - 特点  
@@ -36,7 +36,7 @@ FlexPack工作方式与MessagePack**大不相同**，它使用**标记结束位*
 [数据类型][数据][结束符]
 ```
 其中`[数据类型]`与`[结束符]`**像一对括号一样**包裹住数据，以此达到不用长度标记的目的，自然就可以编码无限数据。其中`[结束符]`固定为`0xFF`，它作为FlexPack的核心标记。但是现在可能会出现数据中出现`0xFF`的情况干扰解码器工作，标准方法是对数据中的`0xFF`进行转义，但是FlexPack用了一个非常“**邪门**”的方法：  
-把数据的Unit8Array当成一个**256进制的大整数**，然后**转换成255进制**，因为255进制只有0~254，所以**避免了数据出现255`0xFF`的情况**。这会带来一定程度的**数据膨胀**，我们可以用数学计算膨胀率：  
+把数据的Uint8Array当成一个**256进制的大整数**，然后**转换成255进制**，因为255进制只有0~254，所以**避免了数据出现255`0xFF`的情况**。这会带来一定程度的**数据膨胀**，我们可以用数学计算膨胀率：  
 设原始数据长度为`n`，那么原始数据可看成一个大整数 $256^{n}$ ,转成255进制的操作会使数据长度变为`m`$=\log_{255}(256^n)=n\log_{255}(256)$，于是膨胀率为 $\frac{m}{n}=\frac{n\log_{255}(256)}{n}=\log_{255}(256)\approx1.0007\approx1$，可忽略不计。  
 需注意有时候数据并不一定是`[数据类型][数据][结束符]`的形式，`0xFF`可灵活运用，如RegExp的格式就让`0xFF`起到**分隔符**的作用：
 ```plaintext
@@ -82,7 +82,7 @@ FlexPack工作方式与MessagePack**大不相同**，它使用**标记结束位*
 如果`FlexPack.encode()`输入了**不兼容数据类型的数据**（如`URLSearchParams`、`WeakMap`，`TextEncoder`）那么它会报错：  
     > FlexPack encoder discovered an unknown data type - [Type]  
     
-    如果`FlexPack.decode()`传入的Unit8Array**出现了未知数据标记**，它也会报错：
+    如果`FlexPack.decode()`传入的Uint8Array**出现了未知数据标记**，它也会报错：
     > FlexPack decoder found an unknown data type tag - [sign]
 
     但是报错**并不是以抛出形式**呈现的，它会输出在终端上，这意味着**即使报错FlexPack仍会继续工作，不会使程序停下来**，所以使用时多关注日志。
@@ -90,7 +90,7 @@ FlexPack工作方式与MessagePack**大不相同**，它使用**标记结束位*
 因为FlexPack开发者song_luck**是一个中学生**，所以**迫于学业压力和不成熟的代码专业才能**，FlexPack**有许多缺点**，望多多指出。
 1. 编码解码效率比MessagePack慢许多  
 **时间复杂度较高**，大对象 / 大数组编码速度不如 MsgPack 等成熟库。
-2. 编码生成的Unit8Array相比MessagePack偏长  
+2. 编码生成的Uint8Array相比MessagePack偏长  
 简单对象 / 短数据的编码长度**可能比 MsgPack 长**。
 3. 代码工程规范不足  
 这可能会让一些**强迫症难受一整天**，比如`type=="RegExp"`等号前后不加空格、`{"float3701":Null}`冒号前后不加空格等
