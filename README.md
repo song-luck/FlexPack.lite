@@ -1,5 +1,5 @@
 # FlexPack介绍
-> 中文 | [English](./README_EN.md)
+> There are English documents in the project
 
 > It's like MessagePack, but more flexible and unlimited.
 - 基础介绍  
