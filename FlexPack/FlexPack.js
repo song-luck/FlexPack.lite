@@ -35,37 +35,19 @@ const FlexPack={
             },
         TextEncoder:new TextEncoder(),
         TextDecoder:new TextDecoder(),
-        NumberEncode:function(num){
-            if (Number.isInteger(num)) {
-                const bytes = [];
-                let n = num < 0 ? (num * -2 - 1) : num * 2;
-                do {
-                let b = n & 0x7F;
-                n >>>= 7;
-                if (n > 0) b |= 0x80;
-                bytes.push(b);
-            } while (n > 0);
-            return new Uint8Array(bytes);
-            };
-            const buf = new ArrayBuffer(8);
-            new DataView(buf).setFloat64(0, num, false);
-            const bytes = new Uint8Array(buf);
-            return bytes;
-          },
-        NumberDecode:function(bytes) {
-            if (bytes.length <= 8 && bytes.every(b => (b & 0x80) !== 0 || bytes.indexOf(b) === bytes.length-1)) {
-                let n = 0, shift = 0, i = 0;
-                while (i < bytes.length) {
-                const b = bytes[i++];
-                n |= (b & 0x7F) << shift;
-                shift += 7;
-                if (!(b & 0x80)) break;
-            };
-            return n & 1 ? -(n >>> 1) - 1 : n >>> 1;
-            };          
-            const originalBytes = bytes;
-            return new DataView(originalBytes.buffer).getFloat64(0, false);
-          }
+        NumberEncode:function(num) {
+            const buffer = new ArrayBuffer(8);
+            const view = new DataView(buffer);
+            view.setFloat64(0, num, false);
+            return new Uint8Array(buffer);
+        },
+        NumberDecode:function NumberDecode(arr) {
+            if (!(arr instanceof Uint8Array) || arr.length !== 8) {
+                throw new Error("仅支持8字节Uint8Array解码");
+            }
+            const view = new DataView(arr.buffer);
+            return view.getFloat64(0, false);
+        }
     },
     encode:function(data){
         let output=[];

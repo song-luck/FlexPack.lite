@@ -12,9 +12,9 @@ FlexPack是song_luck在试图手动实现MessagePack时意外手搓出来的一�
 - 特点  
 1. 支持理论无限数据长度  
 MessagePack因为以长度头标记数据长度，长度头能标记的数据长度很有限，所以像`Array`、`Map`、`String`、`Object`等类型有长度硬限制，FlexPack与MessagePack走了两条截然不同的技术路线，它可以编码理论无限长的数据，无硬性限制。
-2. 容易扩展  
+2. 容易扩展
 如果你熟悉FlexPack架构，可以轻松在FlexPack的`encode()`、`decode`代码中加入新类型的编码代码，实现扩展兼容。
-3. 可编码类型稍广  
+3. 可编码类型稍广
 可编码类型比MessagePack稍微广一些，类型展开后MessagePack标准支持12种，FlexPack标准支持27种。
 - 使用方法  
 将文件夹中的`FlexPack.js`或`FlexPack.min.js`复制下来，它就会定义一个`FlexPack`对象，里面有`encode()`与`decode()`两个方法，可对数据进行**序列化**和**反序列化**。注意代码是`const FlexPack={...}`形式，使用时注意**作用域**的影响。
@@ -119,7 +119,7 @@ FlexPack.internal.BaseToBase([0,0,0,1,0,1,1,0,1,1],2,10，true)//返回[0,0,0,9,
 4. **可能有隐藏Bug**  
 song_luck测试时固定使用一个对象测试，可能结果不具有普适性，这会导致FlexPack在某些场景**表现出一些意想不到的Bug**，还请各位大佬多多提出。
 5. 更新慢  
-song_luck是寄宿生，能碰电脑的时间很短，所以大家的意见可能**经常会得不到处理**，不过也希望大家多多提出意见。
+song_luck是寄宿生，能碰电脑的随机很短，所以大家的意见可能**经常会得不到处理**，不过也希望大家多多提出意见。
 - 协议  
 参见LICENSE
 >Copyright (c) 2026 song_luck  
